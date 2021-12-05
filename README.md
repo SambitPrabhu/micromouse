@@ -1,2 +1,2 @@
 # micromouse
-Code and Simulation files for micrmouse.
+Code and Simulation files for Micromouse.
