@@ -378,6 +378,45 @@ if __name__ == '__main__':
     y=0 #Stores the location of y coordinate currently robot is at.
     orient=0#(orient_inital) #Stores orientation for the robot. 0 for north,1 for east, 2 for south and 3 for west.
 
+    while True:
+
+        L= api.wallLeft()
+        R= api.wallRight()
+        F= api.wallFront()
+        updateWalls(x,y,orient,L,R,F)
+
+        if (flood[y][x]!=0):
+            floodFill(x,y,xprev,yprev)
+        else:
+            print("Eureka!! Path has been found")
+            break
+       
+        direction= toMove(x,y,xprev,yprev,orient)
+
+        
+        if (direction=='L'):
+            api.turnLeft()
+            orient = api.orientation(orient,'L')
+
+        elif (direction=='R'):
+            api.turnRight()
+            orient = api.orientation(orient,'R')
+
+        elif (direction=='B'):
+            api.turnLeft()
+            orient = api.orientation(orient,'L')
+            api.turnLeft()
+            orient = api.orientation(orient,'L')
+
+
+        log("moveForward")
+        showFlood(x,y)
+        api.moveForward()
+        xprev=x
+        yprev=y
+        x,y = api.updateCoordinates(x,y,orient)
+        
+
     main()
 
 
