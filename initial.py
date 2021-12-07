@@ -6,13 +6,15 @@ from numpy import ma
 class robot:
                 
     def __init__(self,x_initial,y_initial,orient_inital):
-        self.maze=np.full((16,16),255) #255 defines highest possible value and that the cell has not been 
-                            # visited yet.
+        self.maze=np.full((16,16),0) #Used for storing wall configuration.
+
+        self.flood = np.full((16,16),255) #Used for storing the flood array and the costs which shall be used for traversal.
+        
         self.x=x_initial  #Stores the location of x coordinate currently robot is at.
         self.y=y_initial  #Stores the location of y coordinate currently robot is at.
 
         self.orient = orient_inital #Stores orientation for the robot. 0 for north,1 for east, 2 for south and 3 for west.
-
+        
 
     def isValid (self,y,x):
     #Checks if the given coordinates are valid ones.
@@ -24,17 +26,17 @@ class robot:
     def flood_initial(self):  # For generating the initial flooded maze assuming no walls are present.
 
    
-        self.maze[7][7] =0 #Destination Cells are given weightage as zero.
-        self.maze[7][8] =0 
-        self.maze[8][7] =0
-        self.maze[8][8] =0
+        self.flood[7][7] =0 #Destination Cells are given weightage as zero.
+        self.flood[7][8] =0 
+        self.flood[8][7] =0
+        self.flood[8][8] =0
 
 
         for i in range(16):
             for j in range(16):
                 xdist = min(abs(j-7),np.abs(j-8))
                 ydist = min(abs(i-7),np.abs(i-8))
-                self.maze[i][j] = xdist + ydist
+                self.flood[i][j] = xdist + ydist
         
 
     def isEnd(self): #Checks if the bot has reached the destination.
@@ -58,6 +60,9 @@ class robot:
 
 
 
+mouse = robot(0,0,0)
+mouse.flood_initial()
+print(mouse.flood) 
 
 
 
