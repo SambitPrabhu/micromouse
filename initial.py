@@ -298,9 +298,8 @@ class robot:
                     if (self.isAccessible(xrun,yrun,x3,y3)):
                         stack.append(x3)
                         stack.append(y3)
-
-
-
+        
+  
 
 mouse = robot(0,0,0)
 mouse.flood_initial()
