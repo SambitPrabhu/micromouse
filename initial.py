@@ -6,7 +6,7 @@ from numpy import ma
 class robot:
                 
     def __init__(self,x_initial,y_initial,orient_inital):
-        self.self.maze=np.full((16,16),0) #Used for storing wall configuration.
+        self.maze=np.full((16,16),0) #Used for storing wall configuration.
 
         self.flood = np.full((16,16),255) #Used for storing the flood array and the costs which shall be used for traversal.
         
@@ -62,7 +62,7 @@ class robot:
         #Gives the wall the configuration based on the presence of walls on left, right or front of the robot.
         if(L and R and F):
             if (self.orient==0): 
-                self.self.maze[self.y][self.x]= 13
+                self.maze[self.y][self.x]= 13
             elif (self.orient==1): 
                 self.maze[self.y][self.x]= 12
             elif (self.orient==2): 
