@@ -490,19 +490,13 @@ def goHome():
    while True:
     walkCount-=1 
 
-    direction = (history[walkCount][2]+2)%4
+    direction = (history[walkCount][2]+2)%4 #Orientation should be just reverse of original run.
     moveAndUpdate(direction)
 
     if walkCount==0:
        print("Reached Home")
        fastRun() #Implement Fast Run. Breaks this.
        break
-
-
-
-
-
-
 
 
 
@@ -549,6 +543,8 @@ def main():
                 floodFill(x,y,xprev,yprev)
             moveAndUpdate(direction)
             pruneHistory()
+            addToHistory()
+            # Add Function for adding to history. Cross check once.
 
         else:
 
