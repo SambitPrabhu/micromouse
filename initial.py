@@ -402,6 +402,10 @@ def toMoveBack(x,y,xprev,yprev,orient):
     else:
         return('B')
 
+def isChannel(x,y):
+    global maze 
+    return (maze[x][y]==9 or maze[x][y] ==10) #Checks if the present cell is a Channel.
+       
 
     
 
@@ -437,46 +441,50 @@ def main():
         R= api.wallRight()
         F= api.wallFront()
         updateWalls(x,y,orient,L,R,F)
+        
 
         if (flood[y][x]!=0):
-            floodFill(x,y,xprev,yprev)
-        else:
-            print("Eureka!! Path has been found")
-            #Execute To move back to initial position using toMoveBack function.
-            #robot is inside the middle 
-            api.turnLeft()
-            orient = api.orientation(orient,'L')
-            api.turnLeft()
-            orient = api.orientation(orient,'L')
-            # log("moveForward")
-            # showFlood(x,y)
-            api.moveForward()
-            x,y = api.updateCoordinates(x,y,orient)
+            if(isChannel(x,y)):
+                print("x")
+            else:
+                floodFill(x,y,xprev,yprev)
+        # else:
+        #     print("Eureka!! Path has been found")
+        #     #Execute To move back to initial position using toMoveBack function.
+        #     #robot is inside the middle 
+        #     api.turnLeft()
+        #     orient = api.orientation(orient,'L')
+        #     api.turnLeft()
+        #     orient = api.orientation(orient,'L')
+        #     # log("moveForward")
+        #     # showFlood(x,y)
+        #     api.moveForward()
+        #     x,y = api.updateCoordinates(x,y,orient)
 
-            while(True):
-                L= api.wallLeft()
-                R= api.wallRight()
-                F= api.wallFront()
-                updateWalls(x,y,orient,L,R,F)
-                if (flood[y][x]!=0):
-                    floodFill(x,y)
+        #     while(True):
+        #         L= api.wallLeft()
+        #         R= api.wallRight()
+        #         F= api.wallFront()
+        #         updateWalls(x,y,orient,L,R,F)
+        #         if (flood[y][x]!=0):
+        #             floodFill(x,y)
 
-                direction= toMoveBack(x,y,xprev,yprev,orient)
+        #         direction= toMoveBack(x,y,xprev,yprev,orient)
 
-                if (direction=='L'):
-                    api.turnLeft()
-                    orient = api.orientation(orient,'L')
+        #         if (direction=='L'):
+        #             api.turnLeft()
+        #             orient = api.orientation(orient,'L')
 
-                elif (direction=='R'):
-                    api.turnRight()
-                    orient = api.orientation(orient,'R')
+        #         elif (direction=='R'):
+        #             api.turnRight()
+        #             orient = api.orientation(orient,'R')
 
-                elif (direction=='B'):
-                    api.turnLeft()
-                    orient = api.orientation(orient,'L')
-                    api.turnLeft()
-                    orient = api.orientation(orient,'L')
-            break
+        #         elif (direction=='B'):
+        #             api.turnLeft()
+        #             orient = api.orientation(orient,'L')
+        #             api.turnLeft()
+        #             orient = api.orientation(orient,'L')
+        
        
         direction= toMove(x,y,xprev,yprev,orient)
 
