@@ -334,13 +334,18 @@ def toMove(x,y,xprev,yprev,orient):
                 else:
                     minVal= minVals[i]
                     minCell= i
+    
+    k = 0 # Counter for storing number of elements having the same minimum cost. 
+    k = minVals.count(minVal) 
 
-    if (minCell==orient):
-        return ('F')
+
+    if(minCell==orient or (k>1 and minVals.count(minVals[orient])>1)):
+            return ('F')
     elif((minCell==orient-1) or (minCell== orient+3)):
-        return('L')
+            return('L')
     elif ((minCell==orient+1) or (minCell== orient-3)):
-        return('R')
+            return('R')
+        
     
 
 
@@ -525,3 +530,4 @@ if __name__ == '__main__':
 
 
 
+'''rishabh '''
