@@ -390,14 +390,14 @@ def toMoveBack(x,y,xprev,yprev,orient):
     for i in range(4):
         if (minVals[i]!=1000 and minVals[i]> maxVal):
             if (noMovements==1):
-                minVal= minVals[i]
+                maxVal= minVals[i]
                 minCell= i
 
             else:
                 if(i==prev):
                     pass
                 else:
-                    minVal= minVals[i]
+                    maxVal= minVals[i]
                     minCell= i
 
     #return(minCell)
@@ -414,6 +414,8 @@ def moveAndUpdate(direction):
     global x 
     global y
     global orient 
+    global xprev
+    global yprev
 
     if (direction=='L'):
             api.turnLeft()
@@ -445,6 +447,8 @@ def main():
     global maze 
     global flood 
     global orient 
+    global xprev
+    global yprev
     
    
 
@@ -487,11 +491,10 @@ def main():
                 R= api.wallRight()
                 F= api.wallFront()
                 updateWalls(x,y,orient,L,R,F)
-                direction = toMoveBack(x,y,xprev,yprev,orient)
-
                 if(not isChannel(x,y)):
                     floodFill(x,y,xprev,yprev)
 
+                direction = toMoveBack(x,y,xprev,yprev,orient)
                 moveAndUpdate(direction)
                 if(not (x == 0 and y ==0)):#When both are 0 it has reached to original position.
                     continue
@@ -528,6 +531,8 @@ if __name__ == '__main__':
     x=0#Stores the location of x coordinate currently robot is at.
     y=0 #Stores the location of y coordinate currently robot is at.
     orient=0#(orient_inital) #Stores orientation for the robot. 0 for north,1 for east, 2 for south and 3 for west.
+    xprev =0
+    yprev =0
 
     main()
 
