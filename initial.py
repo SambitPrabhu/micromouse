@@ -279,6 +279,9 @@ def floodFill(x,y,xprev,yprev):
                 if (isAccessible(xrun,yrun,x3,y3)):
                     stack.append(x3)
                     stack.append(y3)
+def isChannel(x,y):
+    global maze 
+    return (maze[x][y]==9 or maze[x][y]==10) #Checks if the present cell is a channel.
 
 def toMove(x,y,xprev,yprev,orient):
     '''Returns the direction to turn into L,F,R or B
@@ -334,13 +337,18 @@ def toMove(x,y,xprev,yprev,orient):
                 else:
                     minVal= minVals[i]
                     minCell= i
+    
+    k = 0 # Counter for storing number of elements having the same minimum cost. 
+    k = minVals.count(minVal) 
 
-    if (minCell==orient):
-        return ('F')
+
+    if(minCell==orient or (k>1 and minVals.count(minVals[orient])>1)):
+            return ('F')
     elif((minCell==orient-1) or (minCell== orient+3)):
-        return('L')
+            return('L')
     elif ((minCell==orient+1) or (minCell== orient-3)):
-        return('R')
+            return('R')
+        
     
 
 
@@ -402,12 +410,32 @@ def toMoveBack(x,y,xprev,yprev,orient):
     else:
         return('B')
 
-def isChannel(x,y):
-    global maze 
-    return (maze[x][y]==9 or maze[x][y] ==10) #Checks if the present cell is a Channel.
-       
+def moveAndUpdate(direction):
+    global x 
+    global y
+    global orient 
 
-    
+    if (direction=='L'):
+            api.turnLeft()
+            orient = api.orientation(orient,'L')
+
+    elif (direction=='R'):
+            api.turnRight()
+            orient = api.orientation(orient,'R')
+
+    elif (direction=='B'):
+            api.turnLeft()
+            orient = api.orientation(orient,'L')
+            api.turnLeft()
+            orient = api.orientation(orient,'L')
+
+
+        #log("moveForward")
+        #showFlood(x,y)
+    api.moveForward()
+    xprev=x
+    yprev=y
+    x,y = api.updateCoordinates(x,y,orient)
 
 
 def main():
@@ -441,76 +469,57 @@ def main():
         R= api.wallRight()
         F= api.wallFront()
         updateWalls(x,y,orient,L,R,F)
-        
 
         if (flood[y][x]!=0):
-            if(isChannel(x,y)):
-                print("x")
-            else:
+            direction = toMove(x,y,xprev,yprev,orient)
+            if(not isChannel(x,y)):
                 floodFill(x,y,xprev,yprev)
-        # else:
-        #     print("Eureka!! Path has been found")
-        #     #Execute To move back to initial position using toMoveBack function.
-        #     #robot is inside the middle 
+            moveAndUpdate(direction)
+
+        else:
+
+            print("Eureka!! Path has been found")
+
+            #Now it will go back.
+            while True:
+
+                L= api.wallLeft()
+                R= api.wallRight()
+                F= api.wallFront()
+                updateWalls(x,y,orient,L,R,F)
+                direction = toMoveBack(x,y,xprev,yprev,orient)
+
+                if(not isChannel(x,y)):
+                    floodFill(x,y,xprev,yprev)
+
+                moveAndUpdate(direction)
+                if(not (x == 0 and y ==0)):#When both are 0 it has reached to original position.
+                    continue
+                else:
+                    break
+        
+        # if (direction=='L'):
+        #     api.turnLeft()
+        #     orient = api.orientation(orient,'L')
+
+        # elif (direction=='R'):
+        #     api.turnRight()
+        #     orient = api.orientation(orient,'R')
+
+        # elif (direction=='B'):
         #     api.turnLeft()
         #     orient = api.orientation(orient,'L')
         #     api.turnLeft()
         #     orient = api.orientation(orient,'L')
-        #     # log("moveForward")
-        #     # showFlood(x,y)
-        #     api.moveForward()
-        #     x,y = api.updateCoordinates(x,y,orient)
-
-        #     while(True):
-        #         L= api.wallLeft()
-        #         R= api.wallRight()
-        #         F= api.wallFront()
-        #         updateWalls(x,y,orient,L,R,F)
-        #         if (flood[y][x]!=0):
-        #             floodFill(x,y)
-
-        #         direction= toMoveBack(x,y,xprev,yprev,orient)
-
-        #         if (direction=='L'):
-        #             api.turnLeft()
-        #             orient = api.orientation(orient,'L')
-
-        #         elif (direction=='R'):
-        #             api.turnRight()
-        #             orient = api.orientation(orient,'R')
-
-        #         elif (direction=='B'):
-        #             api.turnLeft()
-        #             orient = api.orientation(orient,'L')
-        #             api.turnLeft()
-        #             orient = api.orientation(orient,'L')
-        
-       
-        direction= toMove(x,y,xprev,yprev,orient)
-
-        
-        if (direction=='L'):
-            api.turnLeft()
-            orient = api.orientation(orient,'L')
-
-        elif (direction=='R'):
-            api.turnRight()
-            orient = api.orientation(orient,'R')
-
-        elif (direction=='B'):
-            api.turnLeft()
-            orient = api.orientation(orient,'L')
-            api.turnLeft()
-            orient = api.orientation(orient,'L')
 
 
-        # log("moveForward")
-        # showFlood(x,y)
-        api.moveForward()
-        xprev=x
-        yprev=y
-        x,y = api.updateCoordinates(x,y,orient)
- 
+        # #log("moveForward")
+        # #showFlood(x,y)
+        # api.moveForward()
+        # xprev=x
+        # yprev=y
+        # x,y = api.updateCoordinates(x,y,orient)
+
 
 
 if __name__ == '__main__':
@@ -521,7 +530,6 @@ if __name__ == '__main__':
     orient=0#(orient_inital) #Stores orientation for the robot. 0 for north,1 for east, 2 for south and 3 for west.
 
     main()
-
 
 
 
