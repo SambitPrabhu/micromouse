@@ -1,6 +1,7 @@
 import numpy as np  
 
 from numpy import ma
+import api
 
 
 
@@ -317,7 +318,10 @@ def toMove(x,y,xprev,yprev,orient):
         if (i!=1000):
             noMovements+=1
 
-    #noMovements=1 implies only one cell is accessible to it.
+    #noMovements=1 implies only one cell is accessible to it which is the previous cell.
+
+    if(noMovements==1):
+        return('B')
 
     for i in range(4):
         if (minVals[i]<minVal):
@@ -331,6 +335,64 @@ def toMove(x,y,xprev,yprev,orient):
                     minVal= minVals[i]
                     minCell= i
 
+    if (minCell==orient):
+        return ('F')
+    elif((minCell==orient-1) or (minCell== orient+3)):
+        return('L')
+    elif ((minCell==orient+1) or (minCell== orient-3)):
+        return('R')
+    
+
+
+def toMoveBack(x,y,xprev,yprev,orient):
+    '''returns the direction to turn into L,F,R or B
+    '''
+    x0,y0,x1,y1,x2,y2,x3,y3 = getSurrounds(x,y)
+    val= flood[y][x]
+    prev=0
+    minVals=[1000,1000,1000,1000]
+
+    if (isAccessible(x,y,x0,y0)):
+        if (x0==xprev and y0==yprev):
+            prev=0
+        minVals[0]= flood[y0][x0]
+
+    if (isAccessible(x,y,x1,y1)):
+        if (x1==xprev and y1==yprev):
+            prev=1
+        minVals[1]= flood[y1][x1]
+
+    if (isAccessible(x,y,x2,y2)):
+        if (x2==xprev and y2==yprev):
+            prev=2
+        minVals[2]= flood[y2][x2]
+
+    if (isAccessible(x,y,x3,y3)):
+        if (x3==xprev and y3==yprev):
+            prev=3
+        minVals[3]= flood[y3][x3]
+
+    maxVal=minVals[0]
+    minCell=0
+    noMovements=0
+    for i in minVals:
+        if (i!=1000):
+            noMovements+=1
+
+    for i in range(4):
+        if (minVals[i]!=1000 and minVals[i]> maxVal):
+            if (noMovements==1):
+                minVal= minVals[i]
+                minCell= i
+
+            else:
+                if(i==prev):
+                    pass
+                else:
+                    minVal= minVals[i]
+                    minCell= i
+
+    #return(minCell)
     if (minCell==orient):
         return ('F')
     elif((minCell==orient-1) or (minCell== orient+3)):
@@ -368,15 +430,6 @@ def main():
 
     flood_initial()
     print(flood) 
- 
-
-
-if __name__ == '__main__':
-    maze =[] #Used for storing wall configuration.
-    flood =[]#Used for storing the flood array and the costs which shall be used for traversal.       
-    x=0#Stores the location of x coordinate currently robot is at.
-    y=0 #Stores the location of y coordinate currently robot is at.
-    orient=0#(orient_inital) #Stores orientation for the robot. 0 for north,1 for east, 2 for south and 3 for west.
 
     while True:
 
@@ -389,6 +442,40 @@ if __name__ == '__main__':
             floodFill(x,y,xprev,yprev)
         else:
             print("Eureka!! Path has been found")
+            #Execute To move back to initial position using toMoveBack function.
+            #robot is inside the middle 
+            api.turnLeft()
+            orient = api.orientation(orient,'L')
+            api.turnLeft()
+            orient = api.orientation(orient,'L')
+            # log("moveForward")
+            # showFlood(x,y)
+            api.moveForward()
+            x,y = api.updateCoordinates(x,y,orient)
+
+            while(True):
+                L= api.wallLeft()
+                R= api.wallRight()
+                F= api.wallFront()
+                updateWalls(x,y,orient,L,R,F)
+                if (flood[y][x]!=0):
+                    floodFill(x,y)
+
+                direction= toMoveBack(x,y,xprev,yprev,orient)
+
+                if (direction=='L'):
+                    api.turnLeft()
+                    orient = api.orientation(orient,'L')
+
+                elif (direction=='R'):
+                    api.turnRight()
+                    orient = api.orientation(orient,'R')
+
+                elif (direction=='B'):
+                    api.turnLeft()
+                    orient = api.orientation(orient,'L')
+                    api.turnLeft()
+                    orient = api.orientation(orient,'L')
             break
        
         direction= toMove(x,y,xprev,yprev,orient)
@@ -409,13 +496,21 @@ if __name__ == '__main__':
             orient = api.orientation(orient,'L')
 
 
-        log("moveForward")
-        showFlood(x,y)
+        # log("moveForward")
+        # showFlood(x,y)
         api.moveForward()
         xprev=x
         yprev=y
         x,y = api.updateCoordinates(x,y,orient)
-        
+ 
+
+
+if __name__ == '__main__':
+    maze =[] #Used for storing wall configuration.
+    flood =[]#Used for storing the flood array and the costs which shall be used for traversal.       
+    x=0#Stores the location of x coordinate currently robot is at.
+    y=0 #Stores the location of y coordinate currently robot is at.
+    orient=0#(orient_inital) #Stores orientation for the robot. 0 for north,1 for east, 2 for south and 3 for west.
 
     main()
 
