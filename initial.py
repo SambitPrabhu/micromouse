@@ -279,6 +279,9 @@ def floodFill(x,y,xprev,yprev):
                 if (isAccessible(xrun,yrun,x3,y3)):
                     stack.append(x3)
                     stack.append(y3)
+def isChannel(x,y):
+    global maze 
+    return (maze[x][y]==9 or maze[x][y]==10) #Checks if the present cell is a channel.
 
 def toMove(x,y,xprev,yprev,orient):
     '''Returns the direction to turn into L,F,R or B
@@ -349,70 +352,152 @@ def toMove(x,y,xprev,yprev,orient):
     
 
 
-def toMoveBack(x,y,xprev,yprev,orient):
-    '''returns the direction to turn into L,F,R or B
-    '''
-    x0,y0,x1,y1,x2,y2,x3,y3 = getSurrounds(x,y)
-    val= flood[y][x]
-    prev=0
-    minVals=[1000,1000,1000,1000]
+# def toMoveBack(x,y,xprev,yprev,orient):
+#     '''returns the direction to turn into L,F,R or B
+#     '''
+#     x0,y0,x1,y1,x2,y2,x3,y3 = getSurrounds(x,y)
+#     val= flood[y][x]
+#     prev=0
+#     minVals=[1000,1000,1000,1000]
 
-    if (isAccessible(x,y,x0,y0)):
-        if (x0==xprev and y0==yprev):
-            prev=0
-        minVals[0]= flood[y0][x0]
+#     if (isAccessible(x,y,x0,y0)):
+#         if (x0==xprev and y0==yprev):
+#             prev=0
+#         minVals[0]= flood[y0][x0]
 
-    if (isAccessible(x,y,x1,y1)):
-        if (x1==xprev and y1==yprev):
-            prev=1
-        minVals[1]= flood[y1][x1]
+#     if (isAccessible(x,y,x1,y1)):
+#         if (x1==xprev and y1==yprev):
+#             prev=1
+#         minVals[1]= flood[y1][x1]
 
-    if (isAccessible(x,y,x2,y2)):
-        if (x2==xprev and y2==yprev):
-            prev=2
-        minVals[2]= flood[y2][x2]
+#     if (isAccessible(x,y,x2,y2)):
+#         if (x2==xprev and y2==yprev):
+#             prev=2
+#         minVals[2]= flood[y2][x2]
 
-    if (isAccessible(x,y,x3,y3)):
-        if (x3==xprev and y3==yprev):
-            prev=3
-        minVals[3]= flood[y3][x3]
+#     if (isAccessible(x,y,x3,y3)):
+#         if (x3==xprev and y3==yprev):
+#             prev=3
+#         minVals[3]= flood[y3][x3]
 
-    maxVal=minVals[0]
-    minCell=0
-    noMovements=0
-    for i in minVals:
-        if (i!=1000):
-            noMovements+=1
+#     maxVal=minVals[0]
+#     minCell=0
+#     noMovements=0
+#     for i in minVals:
+#         if (i!=1000):
+#             noMovements+=1
 
-    for i in range(4):
-        if (minVals[i]!=1000 and minVals[i]> maxVal):
-            if (noMovements==1):
-                minVal= minVals[i]
-                minCell= i
+#     for i in range(4):
+#         if (minVals[i]!=1000 and minVals[i]> maxVal):
+#             if (noMovements==1):
+#                 maxVal= minVals[i]
+#                 minCell= i
 
-            else:
-                if(i==prev):
-                    pass
-                else:
-                    minVal= minVals[i]
-                    minCell= i
+#             else:
+#                 if(i==prev):
+#                     pass
+#                 else:
+#                     maxVal= minVals[i]
+#                     minCell= i
 
-    #return(minCell)
-    if (minCell==orient):
-        return ('F')
-    elif((minCell==orient-1) or (minCell== orient+3)):
-        return('L')
-    elif ((minCell==orient+1) or (minCell== orient-3)):
-        return('R')
-    else:
-        return('B')
+#     #return(minCell)
+#     if (minCell==orient):
+#         return ('F')
+#     elif((minCell==orient-1) or (minCell== orient+3)):
+#         return('L')
+#     elif ((minCell==orient+1) or (minCell== orient-3)):
+#         return('R')
+#     else:
+#         return('B')
 
-def isChannel(x,y):
-    global maze 
-    return (maze[x][y]==9 or maze[x][y] ==10) #Checks if the present cell is a Channel.
-       
+def moveAndUpdate(direction):
+    global x 
+    global y
+    global orient 
+    global xprev
+    global yprev
+
+    if (direction=='L'):
+            api.turnLeft()
+            orient = api.orientation(orient,'L')
+
+    elif (direction=='R'):
+            api.turnRight()
+            orient = api.orientation(orient,'R')
+
+    elif (direction=='B'):
+            api.turnLeft()
+            orient = api.orientation(orient,'L')
+            api.turnLeft()
+            orient = api.orientation(orient,'L')
+
+
+        #log("moveForward")
+        #showFlood(x,y)
+    api.moveForward()
+    xprev=x
+    yprev=y
+    x,y = api.updateCoordinates(x,y,orient)
+
+def pruneHistory(findCell):
+    global historyCount
+    global history
+    
+    #findCell represents the element of the dictionary. It is a tuple.
+    i = historyCount -2 
+    while(i>=0):
+        cell = history[i] 
+        if(cell[0] == findCell[0] and cell[1]==findCell[1]):
+            historyCount = i+1 # May have to change later.
+            return None
+        i-=1
+
+def addToHistory():
+    #Stores the x,y and orientation of the robot at the particular cell.
+    global x
+    global y 
+    global orient
+    global historyCount
+    global history
+    
+    history[historyCount] = (x,y,orient) 
+    historyCount+=1 
+
+    return None
+
+def fastRun(): 
+
+    global flood
+    global walkCount
+    global historyCount
+
+    while True:
+
+        direction = history[walkCount][2] 
+        moveAndUpdate(direction)
+        walkCount+=1 
+
+        if(walkCount==historyCount):
+            print("Fast Run Executed. Reached Destination")
+            goHome()
+            break
 
     
+def goHome():
+
+   global walkCount
+
+   while True:
+    walkCount-=1 
+
+    direction = (history[walkCount][2]+2)%4 #Orientation should be just reverse of original run.
+    moveAndUpdate(direction)
+
+    if walkCount==0:
+       print("Reached Home")
+       fastRun() #Implement Fast Run. Breaks this.
+       break
+
 
 
 def main():
@@ -422,6 +507,11 @@ def main():
     global maze 
     global flood 
     global orient 
+    global xprev
+    global yprev
+    global historyCount 
+    global history 
+    global walkCount
     
    
 
@@ -446,76 +536,47 @@ def main():
         R= api.wallRight()
         F= api.wallFront()
         updateWalls(x,y,orient,L,R,F)
-        
 
         if (flood[y][x]!=0):
-            if(isChannel(x,y)):
-                print("x")
-            else:
+            direction = toMove(x,y,xprev,yprev,orient)
+            if(not isChannel(x,y)):
                 floodFill(x,y,xprev,yprev)
-        # else:
-        #     print("Eureka!! Path has been found")
-        #     #Execute To move back to initial position using toMoveBack function.
-        #     #robot is inside the middle 
+            moveAndUpdate(direction)
+            pruneHistory()
+            addToHistory()
+            # Add Function for adding to history. Cross check once.
+
+        else:
+
+            print("Eureka!! Path has been found")
+            walkCount=historyCount
+
+            #Now it will go back.
+            goHome()
+           
+        
+        # if (direction=='L'):
+        #     api.turnLeft()
+        #     orient = api.orientation(orient,'L')
+
+        # elif (direction=='R'):
+        #     api.turnRight()
+        #     orient = api.orientation(orient,'R')
+
+        # elif (direction=='B'):
         #     api.turnLeft()
         #     orient = api.orientation(orient,'L')
         #     api.turnLeft()
         #     orient = api.orientation(orient,'L')
-        #     # log("moveForward")
-        #     # showFlood(x,y)
-        #     api.moveForward()
-        #     x,y = api.updateCoordinates(x,y,orient)
-
-        #     while(True):
-        #         L= api.wallLeft()
-        #         R= api.wallRight()
-        #         F= api.wallFront()
-        #         updateWalls(x,y,orient,L,R,F)
-        #         if (flood[y][x]!=0):
-        #             floodFill(x,y)
-
-        #         direction= toMoveBack(x,y,xprev,yprev,orient)
-
-        #         if (direction=='L'):
-        #             api.turnLeft()
-        #             orient = api.orientation(orient,'L')
-
-        #         elif (direction=='R'):
-        #             api.turnRight()
-        #             orient = api.orientation(orient,'R')
-
-        #         elif (direction=='B'):
-        #             api.turnLeft()
-        #             orient = api.orientation(orient,'L')
-        #             api.turnLeft()
-        #             orient = api.orientation(orient,'L')
-        
-       
-        direction= toMove(x,y,xprev,yprev,orient)
-
-        
-        if (direction=='L'):
-            api.turnLeft()
-            orient = api.orientation(orient,'L')
-
-        elif (direction=='R'):
-            api.turnRight()
-            orient = api.orientation(orient,'R')
-
-        elif (direction=='B'):
-            api.turnLeft()
-            orient = api.orientation(orient,'L')
-            api.turnLeft()
-            orient = api.orientation(orient,'L')
 
 
-        # log("moveForward")
-        # showFlood(x,y)
-        api.moveForward()
-        xprev=x
-        yprev=y
-        x,y = api.updateCoordinates(x,y,orient)
- 
+        # #log("moveForward")
+        # #showFlood(x,y)
+        # api.moveForward()
+        # xprev=x
+        # yprev=y
+        # x,y = api.updateCoordinates(x,y,orient)
+
 
 
 if __name__ == '__main__':
@@ -524,9 +585,16 @@ if __name__ == '__main__':
     x=0#Stores the location of x coordinate currently robot is at.
     y=0 #Stores the location of y coordinate currently robot is at.
     orient=0#(orient_inital) #Stores orientation for the robot. 0 for north,1 for east, 2 for south and 3 for west.
+    xprev =0
+    yprev =0 
+
+
+    historyCount =0 #Stores the number of steps moved by the bot while reaching the destination.
+    history ={} #Dictionary that will store the co-ordinates and orientation of bot 
+    #with co-ordinates as key and orientation as value.
+    walkCount =0 #TO store the number of cells to be moved while coming back.
 
     main()
-
 
 
 
