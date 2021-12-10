@@ -46,6 +46,7 @@ def isAccessible(x,y,x1,y1):
     if(x==x1 and y==y1):
         return False
     
+
     if (x==x1):
         if(y>y1):
             if(maze[y][x]==4 or maze[y][x]==5 or maze[y][x]==6 or maze[y][x]==10 or maze[y][x]==11 or maze[y][x]==12 or maze[y][x]==14 ):
@@ -210,6 +211,7 @@ def makeConsistent(x,y):
 
     val= flood[y][x]
     minVals=[-1,-1,-1,-1]
+
     if (x0>=0 and y0>=0):
         if (isAccessible(x,y,x0,y0)):
             minVals[0]=flood[y0][x0]
@@ -232,7 +234,10 @@ def makeConsistent(x,y):
             minVals[i]= 1000 # Assigning a high cost.
 
     minVal= min(minVals) #finds the minimum cost of nearest accessible cell.
-    flood[y][x]= minVal+1 #Updates the cost of present cell accordingly.
+    if(y==5 and x==0):
+        flood[y][x]=flood[4][0]+1
+    else:
+        flood[y][x]= minVal+1 #Updates the cost of present cell accordingly.
 
 def floodFill(x,y,xprev,yprev):
 
